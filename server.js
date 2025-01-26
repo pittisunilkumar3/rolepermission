@@ -7,10 +7,12 @@ const permissionGroupRoutes = require('./src/routes/permissionGroupRoutes');
 const permissionCategoryRoutes = require('./src/routes/permissionCategoryRoutes');
 const rolePermissionRoutes = require('./src/routes/rolePermissionRoutes');
 const permGroupCombPermCatRoutes = require('./src/routes/permGroupCombPermCatRoutes');
+const permGroupCatRolesPermRoutes = require('./src/routes/permGroupCatRolesPermRoutes');
 const sidebarMenuRoutes = require('./src/routes/sidebarMenuRoutes');
 const sidebarSubMenuRoutes = require('./src/routes/sidebarSubMenuRoutes');
 const staffRoleRoutes = require('./src/routes/staffRoleRoutes');
 const staffRoutes = require('./src/routes/staffRoutes');
+const rolePermissionTemplateRoutes = require('./src/routes/rolePermissionTemplateRoutes');
 const runMigrations = require('./src/migrations/migrationRunner');
 require('dotenv').config();
 
@@ -35,10 +37,12 @@ app.use('/api/permission-groups', permissionGroupRoutes);
 app.use('/api/permission-categories', permissionCategoryRoutes);
 app.use('/api/role-permissions', rolePermissionRoutes);
 app.use('/api', permGroupCombPermCatRoutes);
+app.use('/api', permGroupCatRolesPermRoutes);
 app.use('/api/sidebar-menus', sidebarMenuRoutes);
 app.use('/api/sidebar-sub-menus', sidebarSubMenuRoutes);
 app.use('/api/staff-roles', staffRoleRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api', rolePermissionTemplateRoutes);
 
 // Test API endpoint
 app.get('/api/test', async (req, res) => {

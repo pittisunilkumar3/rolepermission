@@ -1,281 +1,241 @@
-# Role Management API Documentation
+# Role-Based Permission System Documentation
 
-## Database Migrations
-The project includes a migration system in the `/src/migrations` directory:
+## System Architecture
 
-1. Migration Files:
-   - `001_create_roles_table.js`: Creates the roles table with all required fields
-   - Migration runner automatically executes migrations in order
+### Overview
+The role-based permission system provides a comprehensive solution for managing user roles, permissions, and access control within the application.
 
-2. Migration Structure:
-   - Each migration has `up()` and `down()` functions
-   - `up()`: Creates or modifies database structures
-   - `down()`: Reverts the changes made by `up()`
+### Core Components
+1. Staff Management
+2. Role Management
+3. Permission Groups
+4. Permission Categories
+5. Menu Access Control
 
-3. Automatic Execution:
-   - Migrations run automatically when the server starts
-   - Ensures database schema is always up to date
+## Database Schema
 
-## Database Setup
-The database table will be automatically created when you start the server. The following table structure will be created:
+### Tables Relationship
+```
+staff ─┬─── staff_roles ───┬── roles
+       │                   └── roles_permissions ── permission_category ── permission_group
+       └─── sidebar_menus ─── sidebar_sub_menus
+```
 
+### Table Definitions
+
+#### staff
+```sql
+CREATE TABLE staff (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    is_active BOOLEAN DEFAULT true
+);
+```
+
+#### roles
 ```sql
 CREATE TABLE roles (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	name VARCHAR(100) NOT NULL,
-	slug VARCHAR(150) NOT NULL UNIQUE,
-	is_active INT DEFAULT 0,
-	is_system INT DEFAULT 0,
-	is_superadmin INT DEFAULT 0,
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	updated_at DATE
-)
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true
+);
 ```
 
-## Base URL
-`http://localhost:5000/api`
-
-## Endpoints
-
-### 1. Create Single Role
-- **URL:** `/roles`
-- **Method:** `POST`
-- **Payload Example:**
-```json
-{
-	"name": "Admin",
-	"slug": "admin",
-	"is_active": 1,
-	"is_system": 1,
-	"is_superadmin": 0
-}
-```
-- **Success Response:**
-```json
-{
-	"message": "Role created successfully",
-	"data": {
-		"insertId": 1,
-		"affectedRows": 1
-	}
-}
+#### permission_group
+```sql
+CREATE TABLE permission_group (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    short_code VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true
+);
 ```
 
-### 2. Bulk Create Roles
-- **URL:** `/roles/bulk`
-- **Method:** `POST`
-- **Payload Example:**
+## API Endpoints
+
+### Staff Management
+
+#### Get All Staff
+- **Endpoint**: `GET /api/staff`
+- **Description**: Retrieves all staff members with their roles
+- **Authentication**: Required
+- **Response**:
 ```json
 {
-	"roles": [
-		{
-			"name": "Super Admin",
-			"slug": "super-admin",
-			"is_active": 1,
-			"is_system": 1,
-			"is_superadmin": 1
-		},
-		{
-			"name": "User",
-			"slug": "user",
-			"is_active": 1,
-			"is_system": 0,
-			"is_superadmin": 0
-		}
-	]
-}
-```
-- **Success Response:**
-```json
-{
-	"message": "Roles created successfully",
-	"data": {
-		"affectedRows": 2
-	}
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john@example.com",
+            "is_active": true,
+            "roles": ["Admin", "Manager"]
+        }
+    ]
 }
 ```
 
-### 3. Get Single Role
-- **URL:** `/roles/:id`
-- **Method:** `GET`
-- **Example:** `/roles/1`
-- **Success Response:**
+### Role Management
+
+#### Get Role Details
+- **Endpoint**: `GET /api/roles/:id/details`
+- **Description**: Retrieves comprehensive role information
+- **Authentication**: Required
+- **Response**:
 ```json
 {
-	"data": {
-		"id": 1,
-		"name": "Admin",
-		"slug": "admin",
-		"is_active": 1,
-		"is_system": 1,
-		"is_superadmin": 0,
-		"created_at": "2024-02-20T10:00:00.000Z",
-		"updated_at": "2024-02-20"
-	}
+    "success": true,
+    "data": {
+        "role": {
+            "id": 1,
+            "name": "Admin",
+            "description": "System Administrator"
+        },
+        "permissions": [...],
+        "staff": [...]
+    }
 }
 ```
 
-### 4. Get All Roles
-- **URL:** `/roles`
-- **Method:** `GET`
-- **Success Response:**
+### Permission Management
+
+#### Get Permission Groups
+- **Endpoint**: `GET /api/permission-groups`
+- **Description**: Retrieves all permission groups
+- **Authentication**: Required
+- **Response**:
 ```json
 {
-	"data": [
-		{
-			"id": 1,
-			"name": "Admin",
-			"slug": "admin",
-			"is_active": 1,
-			"is_system": 1,
-			"is_superadmin": 0,
-			"created_at": "2024-02-20T10:00:00.000Z",
-			"updated_at": "2024-02-20"
-		},
-		{
-			"id": 2,
-			"name": "User",
-			"slug": "user",
-			"is_active": 1,
-			"is_system": 0,
-			"is_superadmin": 0,
-			"created_at": "2024-02-20T10:00:00.000Z",
-			"updated_at": "2024-02-20"
-		}
-	]
+    "success": true,
+    "data": [
+        {
+            "id": 1,
+            "name": "User Management",
+            "short_code": "USR_MGT",
+            "categories": [...]
+        }
+    ]
 }
 ```
 
-### 5. Get Super Admin Role
-- **URL:** `/roles/super-admin/details`
-- **Method:** `GET`
-- **Success Response:**
+## Implementation Guide
+
+### Authentication
+```javascript
+// Include JWT token in headers
+const headers = {
+    'Authorization': 'Bearer <token>',
+    'Content-Type': 'application/json'
+};
+```
+
+### Role Assignment
+```javascript
+// Assign role to staff
+const assignRole = async (staffId, roleId) => {
+    const response = await fetch(`/api/staff/${staffId}/roles`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ role_id: roleId })
+    });
+    return response.json();
+};
+```
+
+### Permission Validation
+```javascript
+// Check permission
+const hasPermission = async (staffId, permission) => {
+    const response = await fetch(`/api/staff/${staffId}/permissions/${permission}`);
+    const { data } = await response.json();
+    return data.has_permission;
+};
+```
+
+## Error Handling
+
+### Error Response Format
 ```json
 {
-	"data": {
-		"id": 1,
-		"name": "Super Admin",
-		"slug": "super-admin",
-		"is_active": 1,
-		"is_system": 1,
-		"is_superadmin": 1,
-		"created_at": "2024-02-20T10:00:00.000Z",
-		"updated_at": "2024-02-20"
-	}
+    "success": false,
+    "error": {
+        "code": "ERROR_CODE",
+        "message": "Error description",
+        "details": {}
+    }
 }
 ```
 
-### 6. Update Single Role
-- **URL:** `/roles/:id`
-- **Method:** `PUT`
-- **Payload Example:**
-```json
-{
-	"name": "Updated Admin",
-	"slug": "updated-admin",
-	"is_active": 1,
-	"is_system": 1,
-	"is_superadmin": 0
-}
-```
-- **Success Response:**
-```json
-{
-	"message": "Role updated successfully"
-}
-```
+### Common Error Codes
+- `UNAUTHORIZED`: Authentication required
+- `FORBIDDEN`: Insufficient permissions
+- `NOT_FOUND`: Resource not found
+- `VALIDATION_ERROR`: Invalid input data
 
-### 7. Bulk Update Roles
-- **URL:** `/roles/bulk/update`
-- **Method:** `PUT`
-- **Payload Example:**
-```json
-{
-	"roles": [
-		{
-			"id": 1,
-			"name": "Updated Super Admin",
-			"slug": "updated-super-admin",
-			"is_active": 1,
-			"is_system": 1,
-			"is_superadmin": 1
-		},
-		{
-			"id": 2,
-			"name": "Updated User",
-			"slug": "updated-user",
-			"is_active": 0,
-			"is_system": 0,
-			"is_superadmin": 0
-		}
-	]
-}
-```
-- **Success Response:**
-```json
-{
-	"message": "Roles updated successfully"
-}
-```
+## Security Considerations
 
-### 8. Delete Single Role
-- **URL:** `/roles/:id`
-- **Method:** `DELETE`
-- **Example:** `/roles/1`
-- **Success Response:**
-```json
-{
-	"message": "Role deleted successfully"
-}
-```
+### Authentication
+- JWT-based authentication
+- Token expiration and refresh mechanism
+- Secure token storage
 
-### 9. Bulk Delete Roles
-- **URL:** `/roles/bulk/delete`
-- **Method:** `DELETE`
-- **Payload Example:**
-```json
-{
-	"ids": [1, 2, 3]
-}
-```
-- **Success Response:**
-```json
-{
-	"message": "Roles deleted successfully"
-}
-```
+### Authorization
+- Role-based access control
+- Permission validation per request
+- Menu access filtering
 
-## Error Response Format
-All endpoints return the following format for errors:
-```json
-{
-	"error": "Error message description"
-}
-```
+### Data Protection
+- Input validation and sanitization
+- SQL injection prevention
+- XSS protection
 
-## Common Error Responses
-- **404 Not Found:**
-```json
-{
-	"error": "Role not found"
-}
-```
-- **500 Server Error:**
-```json
-{
-	"error": "Internal server error message"
-}
-```
-- **400 Bad Request:**
-```json
-{
-	"error": "Invalid request parameters"
-}
-```
+## Best Practices
 
-## Setup Instructions
-1. Ensure XAMPP MySQL service is running
-2. Create a database named 'test_db' in MySQL
-3. Start the server using `npm start`
-4. The roles table will be automatically created on server start
-5. Use the API endpoints as documented above
+### Role Management
+1. Always assign default role to new staff
+2. Implement role hierarchy
+3. Regular permission audit
+4. Document role changes
+
+### Permission Assignment
+1. Follow principle of least privilege
+2. Group related permissions
+3. Regular permission review
+4. Audit trail for changes
+
+### API Usage
+1. Use proper HTTP methods
+2. Implement rate limiting
+3. Version API endpoints
+4. Comprehensive error handling
+
+## Deployment Considerations
+
+### Environment Setup
+1. Database configuration
+2. JWT secret management
+3. CORS configuration
+4. Rate limiting setup
+
+### Performance Optimization
+1. Permission caching
+2. Database indexing
+3. Query optimization
+4. Response compression
+
+## Monitoring and Maintenance
+
+### Logging
+1. Authentication attempts
+2. Permission changes
+3. Role modifications
+4. Access patterns
+
+### Auditing
+1. Permission changes
+2. Role assignments
+3. Access violations
+4. System modifications

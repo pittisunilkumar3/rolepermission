@@ -1,4 +1,101 @@
-# Staff Management API Documentation
+# Staff API Documentation
+
+## Staff Details Endpoints
+
+### Get Comprehensive Staff Details
+```http
+GET /api/staff/:id/details
+```
+Returns complete staff information including roles, permissions, and accessible menus.
+
+**Parameters**
+- `id` (path) - Staff member ID
+
+**Response**
+```json
+{
+	"success": true,
+	"data": {
+		"staff": {
+			"id": 1,
+			"name": "John Doe",
+			"email": "john@example.com",
+			"is_active": true,
+			"role_names": "Admin,Manager"
+		},
+		"roles": [
+			{
+				"role_id": 1,
+				"role_name": "Admin",
+				"permission_groups": [
+					{
+						"group_id": 1,
+						"group_name": "User Management",
+						"group_code": "USR_MGT",
+						"categories": [
+							{
+								"id": 1,
+								"name": "Users",
+								"code": "USERS",
+								"permissions": {
+									"can_view": true,
+									"can_add": true,
+									"can_edit": true,
+									"can_delete": true
+								}
+							}
+						]
+					}
+				]
+			}
+		],
+		"accessible_menus": [
+			{
+				"id": 1,
+				"name": "Dashboard",
+				"icon": "dashboard",
+				"route_path": "/dashboard",
+				"display_order": 1,
+				"permission_category_name": "Dashboard",
+				"sub_menus": [
+					{
+						"id": 1,
+						"menu_id": 1,
+						"name": "Analytics",
+						"route_path": "/dashboard/analytics",
+						"display_order": 1,
+						"permission_category_name": "Dashboard Analytics"
+					}
+				]
+			}
+		]
+	}
+}
+```
+
+This endpoint provides:
+- Basic staff information
+- All assigned roles with their permissions
+- Permission groups and categories
+- Accessible menus and sub-menus based on permissions
+
+### Error Responses
+
+#### Not Found (404)
+```json
+{
+	"success": false,
+	"error": "Staff not found"
+}
+```
+
+#### Server Error (500)
+```json
+{
+	"success": false,
+	"error": "Error message description"
+}
+```
 
 ## Database Structure
 The staff table has the following structure:
@@ -63,7 +160,22 @@ CREATE TABLE staff (
 ## Base URL
 `http://localhost:5000/api/staff`
 
-## Endpoints
+## API Endpoints Summary
+
+### Staff Management
+- `POST /api/staff` - Create a new staff member
+- `GET /api/staff` - Get all staff members
+- `GET /api/staff/:id` - Get staff member by ID
+- `PUT /api/staff/:id` - Update staff member
+- `DELETE /api/staff/:id` - Delete staff member
+- `GET /api/staff/:id/details` - Get comprehensive staff details including roles and permissions
+
+### Bulk Operations
+- `POST /api/staff/bulk` - Create multiple staff members
+- `PUT /api/staff/bulk/update` - Update multiple staff members
+- `DELETE /api/staff/bulk/delete` - Delete multiple staff members
+
+## Detailed Endpoint Documentation
 
 ### 1. Create Staff Member
 - **URL:** `/`

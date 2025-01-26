@@ -1,87 +1,88 @@
 const express = require('express');
 const router = express.Router();
-const Staff = require('../models/Staff');
+const StaffModel = require('../models/StaffModel');
 
-// Create single staff member
-router.post('/', async (req, res) => {
-	try {
-		const result = await Staff.create(req.body);
-		res.status(201).json({ message: 'Staff member created successfully', data: result });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// Bulk create staff members
-router.post('/bulk', async (req, res) => {
-	try {
-		const result = await Staff.bulkCreate(req.body.staff);
-		res.status(201).json({ message: 'Staff members created successfully', data: result });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// Get single staff member
-router.get('/:id', async (req, res) => {
-	try {
-		const [staff] = await Staff.findById(req.params.id);
-		if (staff.length === 0) {
-			return res.status(404).json({ message: 'Staff member not found' });
-		}
-		res.json({ data: staff[0] });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// Get all staff members
+// Get all staff
 router.get('/', async (req, res) => {
 	try {
-		const [staff] = await Staff.findAll();
-		res.json({ data: staff });
+		const staff = await StaffModel.getAllStaff();
+		res.json({ success: true, data: staff });
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		res.status(500).json({ success: false, error: error.message });
 	}
 });
 
-// Update single staff member
+// Get staff by ID
+router.get('/:id', async (req, res) => {
+	try {
+		const staff = await StaffModel.getStaffById(req.params.id);
+		if (!staff) {
+			return res.status(404).json({ success: false, error: 'Staff not found' });
+		}
+		res.json({ success: true, data: staff });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+});
+
+// Get staff with roles
+router.get('/:id/roles', async (req, res) => {
+	try {
+		const staffWithRoles = await StaffModel.getStaffWithRoles(req.params.id);
+		if (!staffWithRoles) {
+			return res.status(404).json({ success: false, error: 'Staff not found' });
+		}
+		res.json({ success: true, data: staffWithRoles });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+});
+
+// Create staff
+router.post('/', async (req, res) => {
+	try {
+		const staffId = await StaffModel.createStaff(req.body);
+		const staff = await StaffModel.getStaffById(staffId);
+		res.status(201).json({ success: true, data: staff });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+});
+
+// Update staff
 router.put('/:id', async (req, res) => {
 	try {
-		await Staff.update(req.params.id, req.body);
-		res.json({ message: 'Staff member updated successfully' });
+		await StaffModel.updateStaff(req.params.id, req.body);
+		const staff = await StaffModel.getStaffById(req.params.id);
+		if (!staff) {
+			return res.status(404).json({ success: false, error: 'Staff not found' });
+		}
+		res.json({ success: true, data: staff });
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		res.status(500).json({ success: false, error: error.message });
 	}
 });
 
-// Bulk update staff members
-router.put('/bulk/update', async (req, res) => {
-	try {
-		await Staff.bulkUpdate(req.body.staff);
-		res.json({ message: 'Staff members updated successfully' });
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// Delete single staff member
+// Delete staff
 router.delete('/:id', async (req, res) => {
 	try {
-		await Staff.delete(req.params.id);
-		res.json({ message: 'Staff member deleted successfully' });
+		await StaffModel.deleteStaff(req.params.id);
+		res.json({ success: true, message: 'Staff deleted successfully' });
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		res.status(500).json({ success: false, error: error.message });
 	}
 });
 
-// Bulk delete staff members
-router.delete('/bulk/delete', async (req, res) => {
+// Get staff details with roles, permissions and menus
+router.get('/:id/details', async (req, res) => {
 	try {
-		await Staff.bulkDelete(req.body.ids);
-		res.json({ message: 'Staff members deleted successfully' });
+		const staffDetails = await StaffModel.getStaffDetails(req.params.id);
+		if (!staffDetails) {
+			return res.status(404).json({ success: false, error: 'Staff not found' });
+		}
+		res.json({ success: true, data: staffDetails });
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		res.status(500).json({ success: false, error: error.message });
 	}
 });
 
