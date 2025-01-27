@@ -187,6 +187,131 @@ Returns all roles assigned to a staff member.
 }
 ```
 
+### Staff Role Management
+
+#### Create Staff Role
+```http
+POST /api/staff-roles
+```
+**Request Body**
+```json
+{
+	"staff_id": 1,
+	"role_id": 1
+}
+```
+
+#### Bulk Create Staff Roles
+```http
+POST /api/staff-roles/bulk
+```
+**Request Body**
+```json
+{
+	"staffRoles": [
+		{
+			"staff_id": 1,
+			"role_id": 1
+		},
+		{
+			"staff_id": 1,
+			"role_id": 2
+		}
+	]
+}
+```
+
+#### Get Staff Role
+```http
+GET /api/staff-roles/:id
+```
+
+#### Get All Staff Roles
+```http
+GET /api/staff-roles
+```
+
+#### Get Roles by Staff ID
+```http
+GET /api/staff-roles/by-staff/:staffId
+```
+
+#### Get Staff by Role ID
+```http
+GET /api/staff-roles/by-role/:roleId
+```
+
+#### Update Staff Role
+```http
+PUT /api/staff-roles/:id
+```
+**Request Body**
+```json
+{
+	"role_id": 2
+}
+```
+
+#### Bulk Update Staff Roles
+```http
+PUT /api/staff-roles/bulk/update
+```
+**Request Body**
+```json
+{
+	"staffRoles": [
+		{
+			"id": 1,
+			"role_id": 2
+		},
+		{
+			"id": 2,
+			"role_id": 3
+		}
+	]
+}
+```
+
+#### Delete Staff Role
+```http
+DELETE /api/staff-roles/:id
+```
+
+#### Bulk Delete Staff Roles
+```http
+DELETE /api/staff-roles/bulk/delete
+```
+**Request Body**
+```json
+{
+	"ids": [1, 2, 3]
+}
+```
+
+#### Delete Roles by Staff ID
+```http
+DELETE /api/staff-roles/by-staff/:staffId
+```
+
+#### Delete Staff by Role ID
+```http
+DELETE /api/staff-roles/by-role/:roleId
+```
+
+**Response Format for Staff Role Operations**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"staff_id": 1,
+		"role_id": 1,
+		"created_at": "2024-02-01T10:00:00Z",
+		"updated_at": "2024-02-01T10:00:00Z"
+	}
+}
+```
+
 ## 2. Role Management APIs
 
 ### Role CRUD Operations
@@ -216,6 +341,121 @@ Create a new role in the system.
 		"description": "Manages department operations",
 		"created_at": "2023-01-01T00:00:00Z"
 	}
+}
+```
+
+### System Role Management
+
+#### Get All System Roles
+```http
+GET /api/system-roles
+```
+
+#### Get System Role by ID
+```http
+GET /api/system-roles/:id
+```
+
+#### Create System Role
+```http
+POST /api/system-roles
+```
+**Request Body**
+```json
+{
+    "name": "System Administrator",
+    "description": "Full system access",
+    "permissions": {
+        "system_config": true,
+        "user_management": true
+    }
+}
+```
+
+#### Update System Role
+```http
+PUT /api/system-roles/:id
+```
+**Request Body**
+```json
+{
+    "name": "System Administrator",
+    "description": "Updated description",
+    "permissions": {
+        "system_config": true,
+        "user_management": true
+    }
+}
+```
+
+#### Delete System Role
+```http
+DELETE /api/system-roles/:id
+```
+
+#### Search System Roles
+```http
+POST /api/system-roles/search
+```
+**Request Body**
+```json
+{
+    "name": "admin",
+    "permissions": ["system_config"],
+    "status": "active"
+}
+```
+
+#### Get System Role Details
+```http
+GET /api/system-roles/:id/details
+```
+
+**Response Format for System Role Operations**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "System Administrator",
+        "description": "Full system access",
+        "permissions": {
+            "system_config": true,
+            "user_management": true
+        },
+        "created_at": "2024-02-01T10:00:00Z",
+        "updated_at": "2024-02-01T10:00:00Z",
+        "status": "active"
+    }
+}
+```
+
+**Detailed Response Format**
+```json
+{
+    "success": true,
+    "data": {
+        "role": {
+            "id": 1,
+            "name": "System Administrator",
+            "description": "Full system access"
+        },
+        "permissions": {
+            "system_config": true,
+            "user_management": true
+        },
+        "assigned_users": [
+            {
+                "id": 1,
+                "name": "John Doe",
+                "email": "john@example.com"
+            }
+        ],
+        "access_history": {
+            "last_used": "2024-02-01T10:00:00Z",
+            "total_users": 5
+        }
+    }
 }
 ```
 
@@ -2128,6 +2368,825 @@ Get complete system details including all staff, roles, permissions, menus, and 
 {
     "success": false,
     "error": "No superadmin data found"
+}
+```
+
+### Role Permission Templates
+
+#### Create Template
+```http
+POST /api/role-permissions/templates
+```
+**Request Body**
+```json
+{
+	"name": "Admin Template",
+	"permissions": {
+		"user_management": ["view", "edit", "delete"],
+		"system_config": ["view", "edit"]
+	}
+}
+```
+
+#### Get All Templates
+```http
+GET /api/role-permissions/templates
+```
+
+#### Get Template by Name
+```http
+GET /api/role-permissions/templates/:name
+```
+
+#### Update Template
+```http
+PUT /api/role-permissions/templates/:name
+```
+**Request Body**
+```json
+{
+	"permissions": {
+		"user_management": ["view", "edit"],
+		"system_config": ["view"]
+	}
+}
+```
+
+#### Delete Template
+```http
+DELETE /api/role-permissions/templates/:name
+```
+
+#### Apply Template to Role
+```http
+POST /api/role-permissions/templates/:name/apply/:roleId
+```
+
+#### Export Template to Role
+```http
+POST /api/role-permissions/templates/:name/export/:roleId
+```
+
+#### Clone Template
+```http
+POST /api/role-permissions/templates/:name/clone
+```
+**Request Body**
+```json
+{
+	"new_name": "Custom Admin Template",
+	"modify_permissions": {
+		"add": ["report_access"],
+		"remove": ["system_config"]
+	}
+}
+```
+
+#### Import Role Permissions as Template
+```http
+POST /api/role-permissions/templates/import/role/:roleId
+```
+**Request Body**
+```json
+{
+	"template_name": "Role Based Template",
+	"include_categories": ["user_management", "system_config"]
+}
+```
+
+#### Template Version Management
+
+##### Get Template Versions
+```http
+GET /api/role-permissions/templates/:name/versions
+```
+
+##### Get Specific Template Version
+```http
+GET /api/role-permissions/templates/:name/versions/:versionId
+```
+
+##### Revert to Specific Version
+```http
+POST /api/role-permissions/templates/:name/versions/:versionId/revert
+```
+
+**Response Format for Template Operations**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "Admin Template",
+		"permissions": {
+			"user_management": ["view", "edit", "delete"],
+			"system_config": ["view", "edit"]
+		},
+		"created_at": "2024-02-01T10:00:00Z",
+		"updated_at": "2024-02-01T10:00:00Z",
+		"last_used": null
+	}
+}
+```
+
+**Version Response Format**
+```json
+{
+	"success": true,
+	"data": {
+		"version_id": 1,
+		"template_name": "Admin Template",
+		"permissions": {
+			"user_management": ["view", "edit"],
+			"system_config": ["view"]
+		},
+		"created_at": "2024-02-01T10:00:00Z",
+		"created_by": "system"
+	}
+}
+```
+
+### Permission Group Management
+
+#### Get All Permission Groups
+```http
+GET /api/permission-groups
+```
+
+#### Get Permission Group by ID
+```http
+GET /api/permission-groups/:id
+```
+
+#### Get Permission Group Details
+```http
+GET /api/permission-groups/:id/details
+```
+Returns detailed information about the permission group including associated categories and permissions.
+
+**Response**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "User Management",
+		"short_code": "USR_MGT",
+		"categories": [
+			{
+				"id": 1,
+				"name": "User Operations",
+				"short_code": "USR_OPS",
+				"permissions": {
+					"can_view": true,
+					"can_add": true,
+					"can_edit": true,
+					"can_delete": true
+				}
+			}
+		]
+	}
+}
+```
+
+#### Create Permission Group
+```http
+POST /api/permission-groups
+```
+**Request Body**
+```json
+{
+	"name": "Content Management",
+	"short_code": "CNT_MGT",
+	"description": "Content management related permissions"
+}
+```
+
+#### Update Permission Group
+```http
+PUT /api/permission-groups/:id
+```
+**Request Body**
+```json
+{
+	"name": "Content Administration",
+	"short_code": "CNT_ADM",
+	"description": "Updated description"
+}
+```
+
+#### Delete Permission Group
+```http
+DELETE /api/permission-groups/:id
+```
+
+**Response Format for Group Operations**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "Content Management",
+		"short_code": "CNT_MGT",
+		"description": "Content management related permissions",
+		"created_at": "2024-02-01T10:00:00Z",
+		"updated_at": "2024-02-01T10:00:00Z"
+	}
+}
+```
+
+### System Permission Group Management
+
+#### Get All System Permission Groups
+```http
+GET /api/system-permission-groups
+```
+
+#### Get System Permission Group by ID
+```http
+GET /api/system-permission-groups/:id
+```
+
+#### Get Permission Group with Categories
+```http
+GET /api/system-permission-groups/:id/with-categories
+```
+Returns permission group with its associated categories.
+
+**Response**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "User Management",
+		"description": "User management permissions",
+		"categories": [
+			{
+				"id": 1,
+				"name": "User Operations",
+				"permissions": ["view", "create", "edit", "delete"]
+			}
+		]
+	}
+}
+```
+
+#### Create System Permission Group
+```http
+POST /api/system-permission-groups
+```
+**Request Body**
+```json
+{
+	"name": "Content Management",
+	"description": "Content management system permissions",
+	"short_code": "CMS"
+}
+```
+
+#### Update System Permission Group
+```http
+PUT /api/system-permission-groups/:id
+```
+**Request Body**
+```json
+{
+	"name": "Content Administration",
+	"description": "Updated description",
+	"short_code": "CMS_ADMIN"
+}
+```
+
+#### Delete System Permission Group
+```http
+DELETE /api/system-permission-groups/:id
+```
+
+#### Search System Permission Groups
+```http
+POST /api/system-permission-groups/search
+```
+**Request Body**
+```json
+{
+	"name": "user",
+	"short_code": "USR",
+	"status": "active"
+}
+```
+
+**Response Format for System Permission Group Operations**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "Content Management",
+		"description": "Content management system permissions",
+		"short_code": "CMS",
+		"created_at": "2024-02-01T10:00:00Z",
+		"updated_at": "2024-02-01T10:00:00Z",
+		"status": "active"
+	}
+}
+```
+
+### System Permission Category Management
+
+#### Get All System Permission Categories
+```http
+GET /api/system-permission-categories
+```
+
+#### Get System Permission Category by ID
+```http
+GET /api/system-permission-categories/:id
+```
+
+#### Get Categories by Group ID
+```http
+GET /api/system-permission-categories/group/:groupId
+```
+
+#### Create System Permission Category
+```http
+POST /api/system-permission-categories
+```
+**Request Body**
+```json
+{
+    "name": "User Operations",
+    "short_code": "USR_OPS",
+    "group_id": 1,
+    "description": "User operation permissions"
+}
+```
+
+#### Update System Permission Category
+```http
+PUT /api/system-permission-categories/:id
+```
+**Request Body**
+```json
+{
+    "name": "User Management Operations",
+    "short_code": "USR_MGT_OPS",
+    "description": "Updated description"
+}
+```
+
+#### Delete System Permission Category
+```http
+DELETE /api/system-permission-categories/:id
+```
+
+#### Search System Permission Categories
+```http
+POST /api/system-permission-categories/search
+```
+**Request Body**
+```json
+{
+    "name": "user",
+    "short_code": "USR",
+    "group_id": 1,
+    "status": "active"
+}
+```
+
+**Response Format for System Permission Category Operations**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "name": "User Operations",
+        "short_code": "USR_OPS",
+        "group_id": 1,
+        "description": "User operation permissions",
+        "created_at": "2024-02-01T10:00:00Z",
+        "updated_at": "2024-02-01T10:00:00Z",
+        "status": "active"
+    }
+}
+```
+
+### Permission Category Management
+
+#### Create Permission Category
+```http
+POST /api/permission-categories
+```
+**Request Body**
+```json
+{
+	"name": "User Operations",
+	"short_code": "USR_OPS",
+	"group_id": 1
+}
+```
+
+#### Bulk Create Categories
+```http
+POST /api/permission-categories/bulk
+```
+**Request Body**
+```json
+{
+	"categories": [
+		{
+			"name": "User Create",
+			"short_code": "USR_CREATE",
+			"group_id": 1
+		},
+		{
+			"name": "User Edit",
+			"short_code": "USR_EDIT",
+			"group_id": 1
+		}
+	]
+}
+```
+
+#### Get Category
+```http
+GET /api/permission-categories/:id
+```
+
+#### Get All Categories
+```http
+GET /api/permission-categories
+```
+
+#### Update Category
+```http
+PUT /api/permission-categories/:id
+```
+**Request Body**
+```json
+{
+	"name": "User Management",
+	"short_code": "USR_MGT",
+	"group_id": 1
+}
+```
+
+#### Bulk Update Categories
+```http
+PUT /api/permission-categories/bulk/update
+```
+**Request Body**
+```json
+{
+	"categories": [
+		{
+			"id": 1,
+			"name": "User Create",
+			"short_code": "USR_CREATE"
+		},
+		{
+			"id": 2,
+			"name": "User Edit",
+			"short_code": "USR_EDIT"
+		}
+	]
+}
+```
+
+#### Delete Category
+```http
+DELETE /api/permission-categories/:id
+```
+
+#### Bulk Delete Categories
+```http
+DELETE /api/permission-categories/bulk/delete
+```
+**Request Body**
+```json
+{
+	"ids": [1, 2, 3]
+}
+```
+
+**Response Format for Category Operations**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "User Operations",
+		"short_code": "USR_OPS",
+		"group_id": 1,
+		"created_at": "2024-02-01T10:00:00Z",
+		"updated_at": "2024-02-01T10:00:00Z"
+	}
+}
+```
+
+### Sidebar Menu Management
+
+#### Create Menu
+```http
+POST /api/sidebar-menus
+```
+**Request Body**
+```json
+{
+	"name": "Dashboard",
+	"route_path": "/dashboard",
+	"permission_category_id": 1
+}
+```
+
+#### Bulk Create Menus
+```http
+POST /api/sidebar-menus/bulk
+```
+**Request Body**
+```json
+{
+	"menus": [
+		{
+			"name": "Users",
+			"route_path": "/users",
+			"permission_category_id": 2
+		},
+		{
+			"name": "Settings",
+			"route_path": "/settings",
+			"permission_category_id": 3
+		}
+	]
+}
+```
+
+#### Get Menu
+```http
+GET /api/sidebar-menus/:id
+```
+
+#### Get All Menus
+```http
+GET /api/sidebar-menus
+```
+
+#### Update Menu
+```http
+PUT /api/sidebar-menus/:id
+```
+**Request Body**
+```json
+{
+	"name": "User Management",
+	"route_path": "/users",
+	"permission_category_id": 2
+}
+```
+
+#### Bulk Update Menus
+```http
+PUT /api/sidebar-menus/bulk/update
+```
+**Request Body**
+```json
+{
+	"menus": [
+		{
+			"id": 1,
+			"name": "User Management",
+			"route_path": "/users"
+		},
+		{
+			"id": 2,
+			"name": "System Settings",
+			"route_path": "/settings"
+		}
+	]
+}
+```
+
+#### Delete Menu
+```http
+DELETE /api/sidebar-menus/:id
+```
+
+#### Bulk Delete Menus
+```http
+DELETE /api/sidebar-menus/bulk/delete
+```
+**Request Body**
+```json
+{
+	"ids": [1, 2, 3]
+}
+```
+
+**Response Format for Menu Operations**
+```json
+{
+	"success": true,
+	"data": {
+		"id": 1,
+		"name": "Dashboard",
+		"route_path": "/dashboard",
+		"permission_category_id": 1,
+		"sub_menus": [
+			{
+				"id": 2,
+				"name": "Analytics",
+				"route_path": "/dashboard/analytics"
+			}
+		]
+	}
+}
+```
+
+### System Sidebar Menu Management
+
+#### Get All System Menus
+```http
+GET /api/system-sidebar-menus
+```
+
+#### Get System Menu by ID
+```http
+GET /api/system-sidebar-menus/:id
+```
+
+#### Get Menu with Submenus
+```http
+GET /api/system-sidebar-menus/:id/with-submenus
+```
+
+#### Get All Menus with Submenus
+```http
+GET /api/system-sidebar-menus/all/with-submenus
+```
+
+#### Create System Menu
+```http
+POST /api/system-sidebar-menus
+```
+**Request Body**
+```json
+{
+    "name": "Dashboard",
+    "route_path": "/dashboard",
+    "icon": "dashboard",
+    "display_order": 1,
+    "permission_category_id": 1
+}
+```
+
+#### Update System Menu
+```http
+PUT /api/system-sidebar-menus/:id
+```
+**Request Body**
+```json
+{
+    "name": "Admin Dashboard",
+    "route_path": "/admin/dashboard",
+    "icon": "admin_dashboard",
+    "display_order": 1
+}
+```
+
+#### Delete System Menu
+```http
+DELETE /api/system-sidebar-menus/:id
+```
+
+#### Update Display Order
+```http
+PUT /api/system-sidebar-menus/order/update
+```
+**Request Body**
+```json
+{
+    "menu_orders": [
+        {
+            "id": 1,
+            "display_order": 1
+        },
+        {
+            "id": 2,
+            "display_order": 2
+        }
+    ]
+
+#### Create Submenu
+```http
+POST /api/sidebar-submenus
+```
+**Request Body**
+```json
+{
+    "menu_id": 1,
+    "name": "Analytics",
+    "route_path": "/dashboard/analytics"
+}
+```
+
+#### Bulk Create Submenus
+```http
+POST /api/sidebar-submenus/bulk
+```
+**Request Body**
+```json
+{
+    "subMenus": [
+        {
+            "menu_id": 1,
+            "name": "User List",
+            "route_path": "/users/list"
+        },
+        {
+            "menu_id": 1,
+            "name": "User Groups",
+            "route_path": "/users/groups"
+        }
+    ]
+}
+```
+
+#### Get Submenu
+```http
+GET /api/sidebar-submenus/:id
+```
+
+#### Get All Submenus
+```http
+GET /api/sidebar-submenus
+```
+
+#### Get Submenus by Menu ID
+```http
+GET /api/sidebar-submenus/by-menu/:menuId
+```
+
+#### Update Submenu
+```http
+PUT /api/sidebar-submenus/:id
+```
+**Request Body**
+```json
+{
+    "name": "User Management",
+    "route_path": "/users/manage"
+}
+```
+
+#### Bulk Update Submenus
+```http
+PUT /api/sidebar-submenus/bulk/update
+```
+**Request Body**
+```json
+{
+    "subMenus": [
+        {
+            "id": 1,
+            "name": "User List",
+            "route_path": "/users/list"
+        },
+        {
+            "id": 2,
+            "name": "User Groups",
+            "route_path": "/users/groups"
+        }
+    ]
+}
+```
+
+#### Delete Submenu
+```http
+DELETE /api/sidebar-submenus/:id
+```
+
+#### Bulk Delete Submenus
+```http
+DELETE /api/sidebar-submenus/bulk/delete
+```
+**Request Body**
+```json
+{
+    "ids": [1, 2, 3]
+}
+```
+
+**Response Format for Submenu Operations**
+```json
+{
+    "success": true,
+    "data": {
+        "id": 1,
+        "menu_id": 1,
+        "name": "Analytics",
+        "route_path": "/dashboard/analytics"
+    }
 }
 ```
 
