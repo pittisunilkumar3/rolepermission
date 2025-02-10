@@ -999,5 +999,8 @@ static async getPermissionDependencies(categoryId) {
 
 	return await db.query(query, [categoryId]);
 }
+}
+
+module.exports = PermGroupCatRolesPerm;
 
 
